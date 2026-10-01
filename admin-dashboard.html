@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Brandivo Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233b6bff'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='56' font-family='sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* Admin Dashboard Styles */
+    .admin-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: 280px;
+      background: var(--ink-2);
+      border-right: 1px solid var(--line);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .admin-brand {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .admin-brand h3 {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-nav {
+      padding: 20px 0;
+    }
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: var(--slate);
+      transition: all 0.3s;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .admin-nav-item:hover {
+      background: var(--ink-3);
+      color: var(--paper);
+    }
+    .admin-nav-item.active {
+      background: var(--ink-3);
+      color: var(--electric-light);
+      border-left: 3px solid var(--electric);
+    }
+    .admin-nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+    .admin-logout {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Main Content */
+    .admin-main {
+      flex: 1;
+      margin-left: 280px;
+      padding: 0;
+    }
+    .admin-header {
+      background: var(--ink-2);
+      border-bottom: 1px solid var(--line);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .admin-header h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--slate);
+      font-size: 0.9rem;
+    }
+    .admin-content {
+      padding: 32px;
+    }
+
+    /* Dashboard Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--ink-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .stat-card h4 {
+      font-size: 0.85rem;
+      color: var(--slate);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .stat-card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--paper);
+    }
+
+    /* Content Sections */
+    .content-section {
+      display: none;
+    }
+    .content-section.active {
+      display: block;
+    }
+
+    /* Tables */
+    .data-table {
+      width: 100%;
+      background: var(--ink-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table th {
+      background: var(--ink-3);
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--paper);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .data-table td {
+      padding: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--slate);
+    }
+    .data-table tbody tr:hover {
+      background: var(--ink-3);
+    }
+
+    /* Forms */
+    .admin-form {
+      background: var(--ink-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 32px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .form-group-admin {
+      margin-bottom: 20px;
+    }
+    .form-group-admin label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--paper);
+      font-size: 0.9rem;
+    }
+    .form-group-admin input,
+    .form-group-admin textarea,
+    .form-group-admin select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--paper);
+      font-size: 0.95rem;
+    }
+    .form-group-admin textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    /* Image Upload */
+    .image-upload-area {
+      border: 2px dashed var(--line);
+      border-radius: var(--radius-md);
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--ink);
+    }
+    .image-upload-area:hover {
+      border-color: var(--electric);
+      background: var(--ink-3);
+    }
+    .image-upload-area i {
+      font-size: 3rem;
+      color: var(--slate);
+      margin-bottom: 16px;
+    }
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .image-preview-item {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+    }
+    .image-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-item .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Action Buttons */
+    .action-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn-success {
+      background: #34d399;
+      color: var(--ink);
+    }
+    .btn-success:hover {
+      background: #10b981;
+      transform: translateY(-2px);
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+    .btn-icon {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--slate);
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    /* Success Message */
+    .success-message {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #34d399;
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      display: none;
+    }
+    .success-message.show {
+      display: block;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+      .admin-sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .admin-main {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <h3><span class="logo-mark">B</span> Brandivo Studio</h3>
+        <p style="color: var(--slate-dim); font-size: 0.85rem; margin-top: 4px;">Admin Panel</p>
+      </div>
+
+      <nav class="admin-nav">
+        <div class="admin-nav-item active" data-section="dashboard">
+          <i class="fa-solid fa-gauge"></i>
+          <span>Dashboard</span>
+        </div>
+        <div class="admin-nav-item" data-section="blogs">
+          <i class="fa-solid fa-blog"></i>
+          <span>Manage Blogs</span>
+        </div>
+        <div class="admin-nav-item" data-section="form-submissions">
+          <i class="fa-solid fa-envelope"></i>
+          <span>Form Submissions</span>
+        </div>
+        <div class="admin-nav-item" data-section="images">
+          <i class="fa-solid fa-images"></i>
+          <span>Image Gallery</span>
+        </div>
+        <div class="admin-nav-item" data-section="content">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Edit Content</span>
+        </div>
+        <div class="admin-nav-item" data-section="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <div class="admin-logout">
+        <button class="btn btn-danger btn-block" id="logoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="admin-user">
+          <i class="fa-solid fa-user-circle" style="font-size: 1.8rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: var(--paper);" id="adminEmailDisplay"></div>
+            <div style="font-size: 0.8rem;">Administrator</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Dashboard Section -->
+        <section class="content-section active" id="dashboard-section">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <h4>Total Blogs</h4>
+                <div class="stat-card-icon" style="background: var(--gradient-soft); color: var(--electric-light);">
+                  <i class="fa-solid fa-blog"></i>
+                </div>
+              </div>
+              <div class="stat-card-value" id="totalBlogs">0</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <h4>Form Submissions</h4>
+                <div class="stat-card-icon" style="background: rgba(139, 92, 246, 0.16); color: var(--violet-light);">
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+              </div>
+              <div class="stat-card-value" id="totalSubmissions">0</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <h4>Images</h4>
+                <div class="stat-card-icon" style="background: rgba(52, 211, 153, 0.16); color: #34d399;">
+                  <i class="fa-solid fa-images"></i>
+                </div>
+              </div>
+              <div class="stat-card-value" id="totalImages">0</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <h4>Last Login</h4>
+                <div class="stat-card-icon" style="background: rgba(251, 191, 36, 0.16); color: #fbbf24;">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+              </div>
+              <div style="font-size: 1rem; color: var(--slate); margin-top: 8px;" id="lastLogin"></div>
+            </div>
+          </div>
+
+          <div style="margin-top: 32px;">
+            <h2 style="margin-bottom: 20px;">Recent Activity</h2>
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Activity</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recentActivity">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      <i class="fa-solid fa-chart-line"></i>
+                      <p>No recent activity</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Blogs Section -->
+        <section class="content-section" id="blogs-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2>Manage Blogs</h2>
+            <button class="btn btn-primary" id="addBlogBtn">
+              <i class="fa-solid fa-plus"></i> Add New Blog
+            </button>
+          </div>
+
+          <div class="success-message" id="blogSuccessMsg">
+            <i class="fa-solid fa-circle-check"></i> Blog saved successfully!
+          </div>
+
+          <!-- Blog Form -->
+          <div class="admin-form" id="blogForm" style="display: none;">
+            <h3 style="margin-bottom: 24px;">Create/Edit Blog Post</h3>
+            <form id="blogPostForm">
+              <div class="form-row">
+                <div class="form-group-admin">
+                  <label>Blog Title *</label>
+                  <input type="text" id="blogTitle" required placeholder="Enter blog title">
+                </div>
+                <div class="form-group-admin">
+                  <label>Author Name</label>
+                  <input type="text" id="blogAuthor" placeholder="Enter author name" value="Brandivo Studio">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group-admin">
+                  <label>Category</label>
+                  <select id="blogCategory">
+                    <option>Digital Marketing</option>
+                    <option>SEO</option>
+                    <option>Social Media</option>
+                    <option>Web Development</option>
+                    <option>Content Marketing</option>
+                    <option>Branding</option>
+                    <option>PPC Advertising</option>
+                  </select>
+                </div>
+                <div class="form-group-admin">
+                  <label>Featured Image URL</label>
+                  <input type="url" id="blogImage" placeholder="https://example.com/image.jpg">
+                </div>
+              </div>
+
+              <div class="form-group-admin">
+                <label>Short Description *</label>
+                <textarea id="blogExcerpt" required placeholder="Brief summary for blog preview (2-3 sentences)"></textarea>
+              </div>
+
+              <div class="form-group-admin">
+                <label>Full Content *</label>
+                <textarea id="blogContent" required placeholder="Write your full blog content here..." style="min-height: 300px;"></textarea>
+              </div>
+
+              <div class="action-btns">
+                <button type="submit" class="btn btn-success">
+                  <i class="fa-solid fa-save"></i> Save Blog
+                </button>
+                <button type="button" class="btn btn-ghost" id="cancelBlogBtn">
+                  <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Blogs List -->
+          <div id="blogsList">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="blogsTableBody">
+                  <tr>
+                    <td colspan="5" class="empty-state">
+                      <i class="fa-solid fa-blog"></i>
+                      <p>No blogs yet. Click "Add New Blog" to create your first post.</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Form Submissions Section -->
+        <section class="content-section" id="form-submissions-section">
+          <h2 style="margin-bottom: 24px;">Client Form Submissions</h2>
+
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Service</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="submissionsTableBody">
+                <tr>
+                  <td colspan="6" class="empty-state">
+                    <i class="fa-solid fa-inbox"></i>
+                    <p>No form submissions yet.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Images Section -->
+        <section class="content-section" id="images-section">
+          <h2 style="margin-bottom: 24px;">Image Gallery</h2>
+
+          <div class="admin-form">
+            <div class="form-group-admin">
+              <label>Upload New Images</label>
+              <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+              <div class="image-upload-area" id="uploadArea">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h4 style="color: var(--paper); margin-top: 12px;">Click to upload images</h4>
+                <p style="color: var(--slate-dim); font-size: 0.9rem; margin-top: 8px;">
+                  Support: JPG, PNG, GIF, WebP (Max 5MB per image)
+                </p>
+              </div>
+            </div>
+
+            <div class="image-preview" id="imageGallery"></div>
+          </div>
+        </section>
+
+        <!-- Content Editor Section -->
+        <section class="content-section" id="content-section">
+          <h2 style="margin-bottom: 24px;">Edit Website Content</h2>
+
+          <div class="success-message" id="contentSuccessMsg">
+            <i class="fa-solid fa-circle-check"></i> Content updated successfully!
+          </div>
+
+          <div class="admin-form">
+            <h3 style="margin-bottom: 24px;">Homepage Hero Section</h3>
+
+            <div class="form-group-admin">
+              <label>Main Headline</label>
+              <input type="text" id="heroHeadline" placeholder="We Turn Attention Into Growth.">
+            </div>
+
+            <div class="form-group-admin">
+              <label>Subheadline</label>
+              <textarea id="heroSubheadline" placeholder="Data-driven digital marketing strategies..."></textarea>
+            </div>
+
+            <div class="form-group-admin">
+              <label>Primary Button Text</label>
+              <input type="text" id="heroPrimaryBtn" placeholder="Get a Free Strategy Call">
+            </div>
+
+            <h3 style="margin-top: 40px; margin-bottom: 24px;">Contact Information</h3>
+
+            <div class="form-row">
+              <div class="form-group-admin">
+                <label>Email Address</label>
+                <input type="email" id="contactEmail" value="amankumar991855@gmail.com">
+              </div>
+              <div class="form-group-admin">
+                <label>Phone Number</label>
+                <input type="tel" id="contactPhone" value="+91 9235088662">
+              </div>
+            </div>
+
+            <div class="form-group-admin">
+              <label>Office Address</label>
+              <input type="text" id="contactAddress" value="Sector-52, Noida, Uttar Pradesh, 201301">
+            </div>
+
+            <div class="action-btns">
+              <button class="btn btn-success" id="saveContentBtn">
+                <i class="fa-solid fa-save"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="content-section" id="settings-section">
+          <h2 style="margin-bottom: 24px;">Admin Settings</h2>
+
+          <div class="admin-form">
+            <h3 style="margin-bottom: 24px;">Data Management</h3>
+
+            <div class="form-group-admin">
+              <label>Export All Data</label>
+              <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 12px;">
+                Download all your blogs, form submissions, and images as a backup file.
+              </p>
+              <button class="btn btn-primary btn-icon" id="exportDataBtn">
+                <i class="fa-solid fa-download"></i> Export Data
+              </button>
+            </div>
+
+            <div class="form-group-admin" style="margin-top: 32px;">
+              <label>Import Data</label>
+              <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 12px;">
+                Restore data from a previously exported backup file.
+              </p>
+              <input type="file" id="importDataFile" accept=".json" style="display: none;">
+              <button class="btn btn-ghost btn-icon" id="importDataBtn">
+                <i class="fa-solid fa-upload"></i> Import Data
+              </button>
+            </div>
+
+            <div class="form-group-admin" style="margin-top: 32px;">
+              <label style="color: #ef4444;">Danger Zone</label>
+              <p style="color: var(--slate); font-size: 0.9rem; margin-bottom: 12px;">
+                Clear all data from the admin panel. This action cannot be undone.
+              </p>
+              <button class="btn btn-danger btn-icon" id="clearAllDataBtn">
+                <i class="fa-solid fa-trash"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -145,31 +145,53 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ok) valid = false;
       });
       if (valid) {
+        // Save to admin panel localStorage
+        const formData = new FormData(contactForm);
+        const submissions = JSON.parse(localStorage.getItem('brandivo_submissions') || '[]');
+        const submission = {
+          id: Date.now().toString(),
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          company: formData.get('company'),
+          service: formData.get('service'),
+          budget: formData.get('budget'),
+          message: formData.get('message'),
+          date: new Date().toISOString()
+        };
+        submissions.unshift(submission);
+        localStorage.setItem('brandivo_submissions', JSON.stringify(submissions));
+
         const showSuccess = () => {
           contactForm.style.display = 'none';
           const success = document.getElementById('form-success');
           if (success) success.classList.add('show');
         };
-        // No endpoint set yet -> demo mode (nothing is sent). See FORM_ENDPOINT at the top of this file.
-        if (!FORM_ENDPOINT) { showSuccess(); return; }
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const oldLabel = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-        fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(contactForm) })
-          .then(res => { if (!res.ok) throw new Error('Bad response'); showSuccess(); })
-          .catch(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = oldLabel;
-            let msg = contactForm.querySelector('.send-error');
-            if (!msg) {
-              msg = document.createElement('p');
-              msg.className = 'field-error send-error';
-              msg.style.display = 'block';
-              contactForm.appendChild(msg);
-            }
-            msg.textContent = 'Sorry, your message could not be sent. Please email us at hello@kaivora.com.';
-          });
+
+        // If external endpoint is configured, also send there
+        if (FORM_ENDPOINT) {
+          const submitBtn = contactForm.querySelector('button[type="submit"]');
+          const oldLabel = submitBtn.textContent;
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending...';
+          fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: formData })
+            .then(res => { if (!res.ok) throw new Error('Bad response'); showSuccess(); })
+            .catch(() => {
+              submitBtn.disabled = false;
+              submitBtn.textContent = oldLabel;
+              let msg = contactForm.querySelector('.send-error');
+              if (!msg) {
+                msg = document.createElement('p');
+                msg.className = 'field-error send-error';
+                msg.style.display = 'block';
+                contactForm.appendChild(msg);
+              }
+              msg.textContent = 'Sorry, your message could not be sent. Please email us at amankumar991855@gmail.com.';
+            });
+        } else {
+          // No external endpoint - just save to admin and show success
+          showSuccess();
+        }
       } else {
         const firstInvalid = contactForm.querySelector('.invalid input, .invalid select, .invalid textarea');
         if (firstInvalid) firstInvalid.focus();
